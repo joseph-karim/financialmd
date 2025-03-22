@@ -180,17 +180,66 @@ export async function deleteAnalysis(id: string) {
 }
 
 export async function shareAnalysis(id: string) {
-  const { data, error } = await supabase
-    .from('analyses')
-    .update({
-      is_public: true
-    })
-    .eq('id', id)
-    .select('share_id')
-    .single();
+  try {
+    // First check if the user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error('Share failed: User not authenticated');
+      throw new Error('You must be signed in to share an analysis');
+    }
+    
+    console.log('Attempting to share analysis:', id);
+    console.log('Authenticated as user:', user.id);
+    
+    // Verify the analysis exists and belongs to this user
+    const { data: analysisCheck, error: checkError } = await supabase
+      .from('analyses')
+      .select('id, user_id')
+      .eq('id', id)
+      .single();
+      
+    if (checkError) {
+      console.error('Share failed: Unable to verify analysis ownership', checkError);
+      throw new Error('Unable to verify analysis ownership');
+    }
+    
+    if (!analysisCheck) {
+      console.error('Share failed: Analysis not found');
+      throw new Error('Analysis not found');
+    }
+    
+    if (analysisCheck.user_id !== user.id) {
+      console.error('Share failed: Not authorized to share this analysis');
+      throw new Error('You are not authorized to share this analysis');
+    }
+    
+    // Proceed with sharing
+    const { data, error } = await supabase
+      .from('analyses')
+      .update({
+        is_public: true
+      })
+      .eq('id', id)
+      .select('share_id, id')
+      .single();
 
-  if (error) throw error;
-  return data.share_id;
+    if (error) {
+      console.error('Share failed: Database error', error);
+      throw error;
+    }
+    
+    if (!data || !data.share_id) {
+      console.error('Share failed: No share_id returned');
+      throw new Error('Unable to generate share link');
+    }
+    
+    console.log('Analysis shared successfully:', data.share_id);
+    return data.share_id;
+  } catch (error) {
+    console.error('Share analysis error:', error);
+    throw error;
+  }
 }
 
 export async function unshareAnalysis(id: string) {

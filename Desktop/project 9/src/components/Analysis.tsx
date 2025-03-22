@@ -22,7 +22,8 @@ import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler,
 import { Radar, Bar } from 'react-chartjs-2';
 import { analyzeFormData } from '../services/ai/analysis';
 import { ComponentCard } from './analysis/ComponentCard';
-import { shareAnalysis, saveAnalysis, updateAnalysis } from '../services/supabase';
+import { shareAnalysis, saveAnalysis, updateAnalysis, supabase } from '../services/supabase';
+import { toast } from '../lib/toast';
 
 ChartJS.register(
   RadialLinearScale,
@@ -118,15 +119,43 @@ export function Analysis() {
     
     try {
       setIsSharing(true);
+      setError(null); // Clear previous errors
+      
+      // Check if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setError("You must be signed in to share an analysis. Please sign in and try again.");
+        return;
+      }
+      
+      console.log("Attempting to share analysis:", store.analysis.id);
+      
       const shareId = await shareAnalysis(store.analysis.id);
       const shareUrl = `${window.location.origin}/share/${shareId}`;
       setShareUrl(shareUrl);
       
       // Copy to clipboard
-      await navigator.clipboard.writeText(shareUrl);
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        // Show success message
+        toast({
+          title: "Link copied to clipboard!",
+          description: "Share this link with others to let them view your analysis."
+        });
+      } catch (clipboardError) {
+        console.warn('Could not copy to clipboard:', clipboardError);
+        // Still show the link even if copy fails
+      }
     } catch (error) {
       console.error('Error sharing analysis:', error);
       setError(error instanceof Error ? error.message : 'Failed to share analysis');
+      
+      // If error is about authentication, suggest signing in
+      if (error instanceof Error && error.message.includes('signed in')) {
+        // Show sign in modal or redirect to sign in page
+        // This depends on how your auth flow is implemented
+      }
     } finally {
       setIsSharing(false);
     }
