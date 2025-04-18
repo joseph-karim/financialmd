@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build && cp public/_redirects dist/ && cp public/static.html dist/404.html"
+  command = "./build.sh"
   publish = "dist"
 
 # Redirect root path explicitly
