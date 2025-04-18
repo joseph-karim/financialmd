@@ -1,7 +1,4 @@
-# Netlify redirects file
+# Netlify redirects file for Vite React application
 
 # Redirect all routes to index.html for client-side routing
 /*    /index.html   200
-
-# Explicitly handle root path
-/     /index.html   200
