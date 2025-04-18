@@ -1,20 +1,19 @@
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { modules } from '@/lib/module-data';
-import Link from 'next/link';
 import { ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 
 export default function HomePage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const featuredModules = modules.slice(0, 3); // First 3 modules
 
   // Redirect to modules page if user is already logged in
   useEffect(() => {
     // This would typically check authentication status
     // For now, we'll just show the landing page
-  }, [router]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
@@ -28,13 +27,13 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link href="/modules">
+              <Link to="/modules">
                 Explore All Modules
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/modules/practice-efficiency">
+              <Link to="/modules/practice-efficiency">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Start Learning
               </Link>
@@ -63,7 +62,7 @@ export default function HomePage() {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full" asChild>
-                  <Link href={`/modules/${module.slug}`}>
+                  <Link to={`/modules/${module.slug}`}>
                     View Module
                   </Link>
                 </Button>
@@ -91,7 +90,7 @@ export default function HomePage() {
                     Search for CPT, HCPCS, and other billing codes with detailed information.
                   </p>
                   <Button size="sm" variant="outline" asChild>
-                    <Link href="/modules/tools/code-lookup">
+                    <Link to="/modules/tools/code-lookup">
                       Open Tool
                     </Link>
                   </Button>
@@ -102,7 +101,7 @@ export default function HomePage() {
                     Determine the appropriate E/M level based on medical decision making.
                   </p>
                   <Button size="sm" variant="outline" asChild>
-                    <Link href="/modules/em-coding/mdm-coding">
+                    <Link to="/modules/em-coding/mdm-coding">
                       Open Tool
                     </Link>
                   </Button>
@@ -113,7 +112,7 @@ export default function HomePage() {
                     Ensure all required components of Medicare AWV are completed.
                   </p>
                   <Button size="sm" variant="outline" asChild>
-                    <Link href="/modules/awv-optimization/components">
+                    <Link to="/modules/awv-optimization/components">
                       Open Tool
                     </Link>
                   </Button>
@@ -124,7 +123,7 @@ export default function HomePage() {
                     Access reusable documentation snippets for common scenarios.
                   </p>
                   <Button size="sm" variant="outline" asChild>
-                    <Link href="/modules/tools/smart-phrases">
+                    <Link to="/modules/tools/smart-phrases">
                       Open Tool
                     </Link>
                   </Button>
@@ -133,7 +132,7 @@ export default function HomePage() {
             </CardContent>
             <CardFooter>
               <Button className="w-full" asChild>
-                <Link href="/modules/tools">
+                <Link to="/modules/tools">
                   View All Tools
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

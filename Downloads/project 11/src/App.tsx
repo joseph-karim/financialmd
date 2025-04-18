@@ -9,6 +9,7 @@ import { AuthProvider } from './contexts/auth-context'
 
 // Pages
 const Landing = lazy(() => import('./pages/landing'))
+const HomePage = lazy(() => import('./pages/index'))
 const Dashboard = lazy(() => import('./pages/dashboard'))
 const ModuleRouter = lazy(() => import('./pages/module-router'))
 const PatientExamples = lazy(() => import('./pages/patient-examples'))
@@ -36,7 +37,7 @@ export default function App() {
               element={
                 <div className="w-full overflow-y-auto">
                   <Suspense fallback={<LoadingScreen />}>
-                    <Landing />
+                    <HomePage />
                   </Suspense>
                 </div>
               }
