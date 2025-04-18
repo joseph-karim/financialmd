@@ -1,19 +1,16 @@
 [build]
-  command = "npm run build"
+  command = "npm run build && cp public/_redirects dist/ && cp public/static.html dist/404.html"
   publish = "dist"
-  environment = { NODE_VERSION = "18" }
 
-[[plugins]]
-  package = "./netlify-build-plugin.js"
+# Redirect root path explicitly
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
 
+# Redirect all other paths
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = true
-
-[[headers]]
-  for = "/*"
-    [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
 
