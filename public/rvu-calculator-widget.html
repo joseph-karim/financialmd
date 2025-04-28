@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work RVU Calculator</title>
+    <style>
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+        }
+        
+        .calculator-container {
+            width: 100%;
+            padding: 0;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .calculator-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e7f5;
+            background-color: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .logo {
+            max-height: 35px;
+            object-fit: contain;
+        }
+        
+        .calculator-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        /* Table styling */
+        table.rvu-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+            table-layout: fixed;
+        }
+        
+        table.rvu-table th {
+            background-color: #f5f8ff;
+            color: #333;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 15px;
+            border: 1px solid #e1e7f5;
+        }
+        
+        table.rvu-table td {
+            padding: 8px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* Inputs styling */
+        .calculator-content {
+            padding: 20px;
+        }
+        
+        .code-rows {
+            margin-bottom: 20px;
+        }
+        
+        .code-row {
+            display: flex;
+            margin-bottom: 25px; /* Increased from 10px */
+            gap: 15px;
+            align-items: flex-start; /* Changed from flex-end to flex-start */
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 0;
+            position: relative; /* Added for absolute positioning of description */
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .code-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 6px;
+            font-style: italic;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-height: 16px;
+        }
+        
+        .rvu-value {
+            font-size: 0.85rem;
+            color: #4A90E2;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        
+        .row-actions {
+            display: flex;
+            gap: 8px;
+            align-self: flex-start; /* Align with top of inputs */
+            margin-top: 28px; /* Align with input fields */
+        }
+        
+        .remove-row-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* Button styling */
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .calculate-button, .add-row-button {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .add-row-button {
+            background-color: #7ED321;
+        }
+        
+        .calculate-button:hover {
+            background-color: #3a7bc8;
+        }
+        
+        .add-row-button:hover {
+            background-color: #6cb61b;
+        }
+        
+        /* Results section */
+        .result-container {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none;
+        }
+        
+        .result-container.visible {
+            display: block;
+        }
+        
+        .result-heading {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        /* Results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            table-layout: fixed;
+        }
+        
+        .results-table th, .results-table td {
+            border: 1px solid #e1e7f5;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .results-table th {
+            background-color: #f5f8ff;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .results-table td {
+            vertical-align: top;
+        }
+        
+        /* Fix column widths precisely */
+        .results-table th:nth-child(1),
+        .results-table td:nth-child(1) {
+            width: 12%;
+        }
+        
+        .results-table th:nth-child(2),
+        .results-table td:nth-child(2) {
+            width: 48%;
+        }
+        
+        .results-table th:nth-child(3),
+        .results-table td:nth-child(3) {
+            width: 10%;
+            text-align: center;
+        }
+        
+        .results-table th:nth-child(4),
+        .results-table td:nth-child(4),
+        .results-table th:nth-child(5),
+        .results-table td:nth-child(5) {
+            width: 15%;
+            text-align: right;
+        }
+        
+        /* Common table RVU values */
+        .rvu-table {
+            table-layout: fixed;
+        }
+        
+        .rvu-table th:nth-child(1) {
+            width: 15%;
+        }
+        
+        .rvu-table th:nth-child(2) {
+            width: 65%;
+        }
+        
+        .rvu-table th:nth-child(3) {
+            width: 20%;
+            text-align: right;
+        }
+        
+        .rvu-table td:nth-child(3) {
+            text-align: right;
+        }
+        
+        .total-row {
+            background-color: #f0f7ff;
+            font-weight: 700;
+        }
+        
+        .total-row td {
+            border-top: 2px solid #4A90E2;
+            color: #4A90E2;
+        }
+        
+        .note-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4A90E2;
+            padding: 12px 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .note-box h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #4A90E2;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .calculator-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .code-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .input-group {
+                width: 100%;
+            }
+            
+            .row-actions {
+                align-self: flex-end;
+                margin-top: 0;
+            }
+            
+            .button-container {
+                flex-direction: column;
+            }
+            
+            .calculate-button, .add-row-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        /* Source attribution */
+        .attribution-footer {
+            padding: 10px 15px;
+            border-top: 1px solid #e1e7f5;
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        
+        .attribution-footer a {
+            color: #4A90E2;
+            text-decoration: none;
+        }
+        
+        .attribution-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator-header">
+            <h2 class="calculator-title">Work RVU Calculator</h2>
+            <img src="https://cache.aapc.com/cache/svg/aapc-logo-new.svg" alt="AAPC" class="logo">
+        </div>
+        <div class="calculator-content">
+            <div class="note-box">
+                <h4>About Work RVU</h4>
+                <p>Work RVU (wRVU) represents the physician work component of the Resource-Based Relative Value Scale (RBRVS) and is the primary metric used to determine physician compensation. It accounts for the time, skill, effort, and stress involved in providing a service.</p>
+            </div>
+            
+            <div class="code-rows" id="code-rows">
+                <div class="code-row" id="row-1">
+                    <div class="input-group">
+                        <label for="cpt-code-1" class="input-label">CPT/HCPCS Code</label>
+                        <input type="text" id="cpt-code-1" class="input-field cpt-code" placeholder="Enter code (e.g., 99214)">
+                        <div id="code-description-1" class="code-description"></div>
+                        <div id="rvu-value-1" class="rvu-value"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="units-1" class="input-label">Quantity (Number of Times Performed)</label>
+                        <input type="number" id="units-1" class="input-field units" placeholder="Enter quantity" value="1" min="1">
+                    </div>
+                    <div class="row-actions">
+                        <button class="remove-row-btn" onclick="removeRow(1)" style="visibility: hidden;">×</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <button id="add-row-button" class="add-row-button" onclick="addRow()">+ Add Another Code</button>
+                <button id="calculate-button" class="calculate-button">Calculate Work RVUs</button>
+            </div>
+            
+            <div id="result-container" class="result-container">
+                <h3 class="result-heading">RVU Calculation Results</h3>
+                <table class="results-table" id="results-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Units</th>
+                            <th>RVU</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body">
+                        <!-- Results will be added here -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align: right;"><strong>Grand Total:</strong></td>
+                            <td id="grand-total">0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div id="rvu-table-container" style="margin-top: 30px;">
+                <h3 class="result-heading">Common Work RVU Values</h3>
+                <table class="rvu-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>RVU</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>99202</td><td>Office visit, new patient, straightforward MDM</td><td>0.93</td></tr>
+                        <tr><td>99203</td><td>Office visit, new patient, low MDM</td><td>1.60</td></tr>
+                        <tr><td>99204</td><td>Office visit, new patient, moderate MDM</td><td>2.60</td></tr>
+                        <tr><td>99205</td><td>Office visit, new patient, high MDM</td><td>3.50</td></tr>
+                        <tr><td>99212</td><td>Office visit, est. pt, straightforward MDM</td><td>0.70</td></tr>
+                        <tr><td>99213</td><td>Office visit, est. pt, low MDM</td><td>1.30</td></tr>
+                        <tr><td>99214</td><td>Office visit, est. pt, moderate MDM</td><td>1.92</td></tr>
+                        <tr><td>99215</td><td>Office visit, est. pt, high MDM</td><td>2.80</td></tr>
+                        <tr><td>G0402</td><td>Welcome to Medicare visit</td><td>2.60</td></tr>
+                        <tr><td>G0438</td><td>Annual wellness visit, initial</td><td>2.60</td></tr>
+                        <tr><td>G0439</td><td>Annual wellness visit, subsequent</td><td>1.92</td></tr>
+                        <tr><td>99495</td><td>Transitional care mgmt - moderate</td><td>2.78</td></tr>
+                        <tr><td>99496</td><td>Transitional care mgmt - high</td><td>3.79</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="note-box" style="margin-top: 25px;">
+                <h4>Physician Compensation & Work RVUs</h4>
+                <p>The amount paid per Work RVU varies significantly between organizations, ranging from $24 to $80 per wRVU. The national average for primary care is approximately $45 per wRVU. A target of 5.4 wRVUs per hour can lead to an annual compensation of approximately $400,000.</p>
+            </div>
+            
+            <div class="attribution-footer">
+                <p>RVU values and calculator functionality based on <a href="https://www.aapc.com/tools/rvu-calculator.aspx" target="_blank">AAPC RVU Work Calculator</a></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Sample RVU data
+        const rvuDatabase = {
+            "99202": { work: 0.93, description: "Office visit, new patient, straightforward MDM" },
+            "99203": { work: 1.60, description: "Office visit, new patient, low MDM" },
+            "99204": { work: 2.60, description: "Office visit, new patient, moderate MDM" },
+            "99205": { work: 3.50, description: "Office visit, new patient, high MDM" },
+            "99211": { work: 0.18, description: "Office visit, established pt, minimal" },
+            "99212": { work: 0.70, description: "Office visit, established pt, straightforward MDM" },
+            "99213": { work: 1.30, description: "Office visit, established pt, low MDM" },
+            "99214": { work: 1.92, description: "Office visit, established pt, moderate MDM" },
+            "99215": { work: 2.80, description: "Office visit, established pt, high MDM" },
+            
+            // Medicare codes
+            "G0402": { work: 2.60, description: "Welcome to Medicare visit" },
+            "G0438": { work: 2.60, description: "Annual wellness visit, initial" },
+            "G0439": { work: 1.92, description: "Annual wellness visit, subsequent" },
+            
+            // Add-on codes
+            "G2211": { work: 0.33, description: "Medicare continuity of care" },
+            "99406": { work: 0.24, description: "Tobacco use counseling 3-10 minutes" },
+            "99407": { work: 0.50, description: "Tobacco use counseling >10 minutes" },
+            "99401": { work: 0.48, description: "Preventive medicine counseling, 15 min" },
+            
+            // Screenings and counseling
+            "G0444": { work: 0.18, description: "Annual depression screening" },
+            "G0446": { work: 0.45, description: "Intensive behavioral therapy for CVD" },
+            "G0447": { work: 0.45, description: "Behavior counseling for obesity" },
+            "G0442": { work: 0.18, description: "Annual alcohol misuse screening" },
+            "G0443": { work: 0.45, description: "Brief alcohol misuse counseling" },
+            "G0296": { work: 0.52, description: "Counseling for lung cancer screening" },
+            
+            // Advance Care Planning
+            "99497": { work: 1.50, description: "Advance care planning, first 30 min" },
+            
+            // Procedures
+            "69210": { work: 0.61, description: "Cerumen removal" },
+            "17110": { work: 0.70, description: "Wart destruction 1-14 lesions" },
+            "11200": { work: 0.80, description: "Skin tag removal 1-15 lesions" },
+            "17000": { work: 0.61, description: "Destruction of benign/premalignant lesion, first" },
+            "17003": { work: 0.04, description: "Destruction of benign/premalignant lesion, 2-14" },
+            
+            // TCM codes
+            "99495": { work: 2.78, description: "Transitional care management, moderate complexity" },
+            "99496": { work: 3.79, description: "Transitional care management, high complexity" },
+            
+            // Annual exams
+            "99381": { work: 1.50, description: "Initial preventive medicine, infant (<1 yr)" },
+            "99382": { work: 1.60, description: "Initial preventive medicine, early childhood (1-4 yr)" },
+            "99383": { work: 1.70, description: "Initial preventive medicine, late childhood (5-11 yr)" },
+            "99384": { work: 2.00, description: "Initial preventive medicine, adolescent (12-17 yr)" },
+            "99385": { work: 1.92, description: "Initial preventive medicine, 18-39 yr" },
+            "99386": { work: 2.33, description: "Initial preventive medicine, 40-64 yr" },
+            "99387": { work: 2.50, description: "Initial preventive medicine, 65+ yr" },
+            "99391": { work: 1.37, description: "Periodic preventive medicine, infant (<1 yr)" },
+            "99392": { work: 1.50, description: "Periodic preventive medicine, early childhood (1-4 yr)" },
+            "99393": { work: 1.50, description: "Periodic preventive medicine, late childhood (5-11 yr)" },
+            "99394": { work: 1.70, description: "Periodic preventive medicine, adolescent (12-17 yr)" },
+            "99395": { work: 1.75, description: "Periodic preventive medicine, 18-39 yr" },
+            "99396": { work: 1.90, description: "Periodic preventive medicine, 40-64 yr" },
+            "99397": { work: 2.00, description: "Periodic preventive medicine, 65+ yr" }
+        };
+
+        // Default value for calculation
+        const defaultRatePerRVU = 45;
+        let rowCounter = 1;
+
+        // Add more rows for additional codes
+        function addRow() {
+            rowCounter++;
+            const codeRows = document.getElementById('code-rows');
+            const newRow = document.createElement('div');
+            newRow.className = 'code-row';
+            newRow.id = `row-${rowCounter}`;
+            newRow.innerHTML = `
+                <div class="input-group">
+                    <label for="cpt-code-${rowCounter}" class="input-label">CPT/HCPCS Code</label>
+                    <input type="text" id="cpt-code-${rowCounter}" class="input-field cpt-code" placeholder="Enter code (e.g., 99214)">
+                    <div id="code-description-${rowCounter}" class="code-description"></div>
+                    <div id="rvu-value-${rowCounter}" class="rvu-value"></div>
+                </div>
+                <div class="input-group">
+                    <label for="units-${rowCounter}" class="input-label">Quantity (Number of Times Performed)</label>
+                    <input type="number" id="units-${rowCounter}" class="input-field units" placeholder="Enter quantity" value="1" min="1">
+                </div>
+                <div class="row-actions">
+                    <button class="remove-row-btn" onclick="removeRow(${rowCounter})">×</button>
+                </div>
+            `;
+            codeRows.appendChild(newRow);
+            
+            // Show the remove button on the first row if we have more than one row
+            if (rowCounter > 1) {
+                document.querySelector('#row-1 .remove-row-btn').style.visibility = 'visible';
+            }
+
+            // Add event listener for the new code input
+            const codeInput = document.getElementById(`cpt-code-${rowCounter}`);
+            codeInput.addEventListener('input', function() {
+                updateCodeInfo(rowCounter);
+            });
+        }
+
+        // Remove a row
+        function removeRow(rowId) {
+            const rowToRemove = document.getElementById(`row-${rowId}`);
+            if (rowToRemove) {
+                rowToRemove.remove();
+            }
+            
+            // If only one row left, hide its remove button
+            const rows = document.querySelectorAll('.code-row');
+            if (rows.length === 1) {
+                document.querySelector('.remove-row-btn').style.visibility = 'hidden';
+            }
+        }
+
+        // Update code description and RVU value when a code is entered
+        function updateCodeInfo(rowId) {
+            const codeInput = document.getElementById(`cpt-code-${rowId}`);
+            const descriptionElement = document.getElementById(`code-description-${rowId}`);
+            const rvuValueElement = document.getElementById(`rvu-value-${rowId}`);
+            
+            const code = codeInput.value.trim().toUpperCase();
+            const codeData = rvuDatabase[code];
+            
+            if (codeData) {
+                descriptionElement.textContent = codeData.description;
+                descriptionElement.style.color = '#4A90E2';
+                
+                rvuValueElement.textContent = `RVU Value: ${codeData.work.toFixed(2)}`;
+                rvuValueElement.style.display = 'block';
+            } else {
+                descriptionElement.textContent = code ? 'Code not found in database' : '';
+                descriptionElement.style.color = code ? '#f44336' : '#666';
+                
+                rvuValueElement.textContent = '';
+                rvuValueElement.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateButton = document.getElementById('calculate-button');
+            const resultContainer = document.getElementById('result-container');
+            const resultsBody = document.getElementById('results-body');
+            const grandTotalElement = document.getElementById('grand-total');
+            
+            // Add event listener for the first code input
+            const firstCodeInput = document.getElementById('cpt-code-1');
+            firstCodeInput.addEventListener('input', function() {
+                updateCodeInfo(1);
+            });
+            
+            calculateButton.addEventListener('click', function() {
+                // Get all code rows
+                const rows = document.querySelectorAll('.code-row');
+                let validRows = [];
+                let hasErrors = false;
+                
+                // Validate each row
+                rows.forEach(row => {
+                    const rowId = row.id.split('-')[1];
+                    const codeInput = document.getElementById(`cpt-code-${rowId}`);
+                    const unitsInput = document.getElementById(`units-${rowId}`);
+                    
+                    const code = codeInput.value.trim().toUpperCase();
+                    const units = parseInt(unitsInput.value) || 1;
+                    
+                    // Skip empty rows
+                    if (!code) return;
+                    
+                    // Check if code exists in database
+                    const codeData = rvuDatabase[code];
+                    if (!codeData) {
+                        codeInput.style.borderColor = '#f44336';
+                        hasErrors = true;
+                    } else {
+                        codeInput.style.borderColor = '#ddd';
+                        validRows.push({
+                            code,
+                            units,
+                            description: codeData.description,
+                            workRVU: codeData.work
+                        });
+                    }
+                });
+                
+                // If no valid codes or errors, show alert
+                if (validRows.length === 0) {
+                    if (hasErrors) {
+                        alert('One or more codes were not found. Please check and try again.');
+                    } else {
+                        alert('Please enter at least one CPT or HCPCS code.');
+                    }
+                    return;
+                }
+                
+                // Calculate and display results
+                let grandTotal = 0;
+                resultsBody.innerHTML = '';
+                
+                validRows.forEach(row => {
+                    const totalRVU = row.workRVU * row.units;
+                    grandTotal += totalRVU;
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="Code">${row.code}</td>
+                        <td data-label="Description">${row.description}</td>
+                        <td data-label="Units">${row.units}</td>
+                        <td data-label="RVU">${row.workRVU.toFixed(2)}</td>
+                        <td data-label="Total">${totalRVU.toFixed(2)}</td>
+                    `;
+                    resultsBody.appendChild(tr);
+                });
+                
+                // Update grand total
+                grandTotalElement.textContent = grandTotal.toFixed(2);
+                
+                // Calculate estimated payment
+                const estimatedPay = grandTotal * defaultRatePerRVU;
+                
+                // Add estimated payment row if not exists
+                if (!document.getElementById('estimated-payment-row')) {
+                    const paymentRow = document.createElement('tr');
+                    paymentRow.id = 'estimated-payment-row';
+                    paymentRow.innerHTML = `
+                        <td colspan="4" style="text-align: right;" data-label="Estimated Payment"><strong>Estimated Payment @ $${defaultRatePerRVU}/wRVU:</strong></td>
+                        <td data-label="Amount" id="estimated-payment">$${estimatedPay.toFixed(2)}</td>
+                    `;
+                    document.querySelector('.results-table tfoot').appendChild(paymentRow);
+                } else {
+                    document.getElementById('estimated-payment').textContent = `$${estimatedPay.toFixed(2)}`;
+                }
+                
+                // Show result container
+                resultContainer.classList.add('visible');
+                
+                // Scroll to results
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Allow searching by pressing Enter
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    calculateButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
